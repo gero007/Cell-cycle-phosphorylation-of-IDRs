@@ -1,0 +1,21 @@
+{
+    "debugBreakpointsState": {
+        "breakpoints": [
+            {
+                "id": 1,
+                "path": "~/shinnyApps/kinases/functions/expectedVsObserved.R",
+                "line_number": 10,
+                "function_steps": "7,4,2",
+                "function_name": "expectedVsObserved",
+                "state": 1,
+                "editor_state": 1,
+                "editor_line_number": 10,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": false,
+                "type": 0,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            }
+        ]
+    }
+}

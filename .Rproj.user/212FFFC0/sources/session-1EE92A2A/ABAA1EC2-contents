@@ -1,0 +1,31 @@
+#
+# This is the user-interface definition of a Shiny web application. You can
+# run the application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+
+    # Application title
+    titlePanel("Cell cycle phosphorylation of IDRs"),
+
+    selectInput("predictor", "Disorder predictor: ",
+                c("SPOT disorder" = "SPOT",
+                  "IUPred" = "IUPred"
+                )),
+    sidebarPanel( 
+    selectInput("kinase_column", "Kinase:",
+                c("All phosphorylations" = "NULL",
+                  "CDK1 subfamily" = "target"
+                  ))),
+
+    # Show a plot of the generated distribution
+    mainPanel(plotOutput("distPlot"))
+    
+))
