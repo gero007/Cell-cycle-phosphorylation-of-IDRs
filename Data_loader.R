@@ -15,7 +15,7 @@ ids <-unlist(strsplit(x = file.names,split = ".iupred",fixed = T))
 IUPred_predictions <- data.frame(ids)
 colnames(IUPred_predictions) <- "ID"
 IUPred_predictions$ID <- as.character(IUPred_predictions$ID)
-positions <- list()
+# positions <- list()
 scores <- list()
 IUPred_disordered <- list()
 
@@ -25,13 +25,13 @@ for (n in 1:length(file.names)) {
   colnames(aux_table) <- c("POS","RES","IUPred_SCORE")
   aux_table$IUPred_DISO <- aux_table$IUPred_SCORE>=0.5
   IUPred_predictions[n,"sequence"] <- paste(aux_table$RES,collapse = "")
-  positions[[n]] <- as.numeric(aux_table$POS)
+  # positions[[n]] <- as.numeric(aux_table$POS)
   scores[[n]] <- as.numeric(aux_table$IUPred_SCORE)
   # IUPred_predictions[n,"phospho"] <- NULL
   # IUPred_predictions[n,"threshold"] <- 0.5
   IUPred_disordered[[n]] <- which(aux_table$IUPred_DISO)
 }
-IUPred_predictions$positions <-positions
+# IUPred_predictions$positions <-positions
 IUPred_predictions$IUPredScores <-scores
 IUPred_predictions$IUPred_disordered <-IUPred_disordered
 
@@ -46,7 +46,7 @@ ids <-unlist(strsplit(x = file.names,split = ".spotd",fixed = T))
 SPOT_predictions <- data.frame(ids)
 colnames(SPOT_predictions) <- "ID"
 SPOT_predictions$ID <- as.character(SPOT_predictions$ID)
-positions <- list()
+# positions <- list()
 scores <- list()
 SPOT_disordered <- list()
 
@@ -55,13 +55,13 @@ for (n in 1:length(file.names)) {
   aux_table <- as.data.frame(aux_table)
   colnames(aux_table) <- c("POS","RES","SPOT_SCORE","SPOT_DISO")
   SPOT_predictions[n,"sequence"] <- paste(aux_table$RES,collapse = "")
-  positions[[n]] <- as.numeric(aux_table$POS)
+  # positions[[n]] <- as.numeric(aux_table$POS)
   scores[[n]] <- as.numeric(aux_table$SPOT_SCORE)
   # IUPred_predictions[n,"phospho"] <- NULL
   # IUPred_predictions[n,"threshold"] <- 0.5
   SPOT_disordered[[n]] <- which(aux_table$SPOT_DISO=="D")
 }
-SPOT_predictions$positions <-positions
+# SPOT_predictions$positions <-positions
 SPOT_predictions$SPOT_scores <-scores
 SPOT_predictions$SPOT_disordered <-SPOT_disordered
 
@@ -70,9 +70,12 @@ SPOT_predictions$SPOT_disordered <-SPOT_disordered
 SPOT_predictions$length <- nchar(SPOT_predictions$sequence)
 
 
+#Merge disorder predictions
 
+disorder_predictions <- merge.data.frame(IUPred_predictions,SPOT_predictions,by = c("ID","sequence","length"))
 
-
+# clean the WS
+rm(IUPred_disordered,SPOT_disordered,scores)
 
 
 
@@ -117,8 +120,8 @@ human_data <- rename(human_data,c(PROTEIN=PROTEIN_ALL,GENE=GENE_ALL))
 levels(human_data$target) <- c("Cdk1 target","Non Cdk1 target")
 human_data$target[is.na(human_data$target)]<-"Non Cdk1 target"
 
-human_data<-merge.data.frame(human_data,IUPred_predictions,by.x = "ACC#",by.y = "ID")
-human_data<-merge.data.frame(human_data,subset(SPOT_predictions,select = -c(sequence,positions)),by.x = "ACC#",by.y = "ID",)
+human_data<-merge.data.frame(human_data,disorder_predictions,by.x = "ACC#",by.y = "ID")
+
 human_data$psites_count <- sapply(human_data$psites, length)
 human_data$psites_CDK1_count <- sapply(human_data$psites_CDK1, length)
 
