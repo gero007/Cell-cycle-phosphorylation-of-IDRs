@@ -8,6 +8,7 @@ library(reshape2)
 
 source("functions/expectedVsObserved.R")
 
+#_______________________________________________________________Load disorder data___________________________________________________________#
 ######IUPred data loading########
 disoPath <- "predictions/IUpred_run_human/"
 file.names <- dir(disoPath, pattern =".iupred")
@@ -76,7 +77,13 @@ disorder_predictions <- merge.data.frame(IUPred_predictions,SPOT_predictions,by 
 
 # clean the WS
 rm(IUPred_disordered,SPOT_disordered,scores)
+#___________________________________________________________________________________________________________________________________________________#
 
+
+
+
+#_______________________________________________________________Load phosphorylation data___________________________________________________________#
+####### Create the human data table with Human phosphorylations and CDK phosphorylations #########
 
 
 human_data <- read_delim("PSP/human_data_curated_V2_cleaned.tab", 
@@ -128,6 +135,77 @@ human_data$psites_CDK1_count <- sapply(human_data$psites_CDK1, length)
 human_data$ST_residues <- lapply(gregexpr("S|T",(human_data$sequence)), FUN=as.numeric)
 
 
+########### Add other Kinases phosphorylations ################
+
+mapk_data <- read_delim("PSP/MAPK/PSP_MAPK_Target_HS.tab", 
+                        "\t", escape_double = FALSE, col_types = cols(MAPK_MOD_RSD = col_character()), 
+                        trim_ws = TRUE)
+
+mapk_data$psite_MAPK <- lapply(mapk_data$MAPK_MOD_RSD, function(x){ return(as.numeric(strsplit(x,",")[[1]]))})
+
+human_data<-merge.data.frame(human_data, mapk_data, by = c("GENE","PROTEIN","ACC#"),all.x = T)
+
+human_data <- human_data %>% mutate(target_mapk=case_when(
+  !is.na(MAPK_MOD_RSD) ~ "mapk target",
+  TRUE ~ "Non mapk target"
+))
+
+aurk_data <- read_delim("PSP/AURK/PSP-Gerber_data_curated_cleaned.tab", 
+                        "\t", escape_double = FALSE, col_types = cols(AURK_MOD_RSD = col_character()), 
+                        trim_ws = TRUE)
+
+aurk_data$psite_aurk <- lapply(aurk_data$AURK_MOD_RSD, function(x){ return(as.numeric(strsplit(x,",")[[1]]))})
+
+human_data<-merge.data.frame(human_data, aurk_data, by = c("ACC#"),all.x = T)
+
+human_data <- human_data %>% mutate(target_aurk=case_when(
+  !is.na(AURK_MOD_RSD) ~ "aurk target",
+  TRUE ~ "Non aurk target"
+))
+
+plk_data <- read_delim("PSP/PLK//PSP-Gerber_data_curated_cleaned.tab", 
+                       "\t", escape_double = FALSE, col_types = cols(PLK_MOD_RSD = col_character()), 
+                       trim_ws = TRUE)
+
+plk_data$psite_plk <- lapply(plk_data$PLK_MOD_RSD, function(x){ return(as.numeric(strsplit(x,",")[[1]]))})
+
+human_data<-merge.data.frame(human_data, plk_data, by = c("ACC#"),all.x = T)
+
+human_data <- human_data %>% mutate(target_plk=case_when(
+  !is.na(PLK_MOD_RSD) ~ "plk target",
+  TRUE ~ "Non plk target"
+))
+
+nek_data <- read_delim("PSP/NEK/PSP_NEK_Target_HS.tab", 
+                       "\t", escape_double = FALSE, col_types = cols(NEK_MOD_RSD = col_character()), 
+                       trim_ws = TRUE)
+
+nek_data$psite_nek <- lapply(nek_data$NEK_MOD_RSD, function(x){ return(as.numeric(strsplit(x,",")[[1]]))})
+
+human_data<-merge.data.frame(human_data, nek_data, by = c("ACC#"),all.x = T)
+
+human_data <- human_data %>% mutate(target_nek=case_when(
+  !is.na(NEK_MOD_RSD) ~ "nek target",
+  TRUE ~ "Non nek target"
+))
+
+dyrk_data <- read_delim("PSP/DYRK/PSP_DYRK_Target_HS.tab", 
+                        "\t", escape_double = FALSE, col_types = cols(DYRK_MOD_RSD = col_character()), 
+                        trim_ws = TRUE)
+
+dyrk_data$psite_dyrk <- lapply(dyrk_data$DYRK_MOD_RSD, function(x){ return(as.numeric(strsplit(x,",")[[1]]))})
+
+human_data<-merge.data.frame(human_data, dyrk_data, by = c("ACC#"),all.x = T)
+
+human_data <- human_data %>% mutate(target_dyrk=case_when(
+  !is.na(DYRK_MOD_RSD) ~ "dyrk target",
+  TRUE ~ "Non dyrk target"
+))
+
+#____________________________________________________________________________________________________________________________________________#
+
+
+#___________________________________________________Calculate Observed vs Expected___________________________________________________________#
 #########IUPred#########
 IUPred_expVSobs <- expectedVsObserved(human_data,"IUPred")
 
@@ -157,4 +235,6 @@ human_data[,SPOT_binom_p := mapply("[[", SPOT_binom, "p.value", SIMPLIFY = T)]
 human_data[,SPOT_binom_q := mapply(p.adjust, SPOT_binom_p)]
 human_data[,SPOT_binom_sig := factor(ifelse(SPOT_binom_q < 0.05, ifelse(SPOT_binom_q < 0.01, "1% FDR", "5% FDR"), "n.s."), levels=c("n.s.","5% FDR", "1% FDR")) ]
 
-save.image("plotting_data_test.RData")
+#____________________________________________________________________________________________________________________________________________#
+
+save.image("plotting_data.RData")

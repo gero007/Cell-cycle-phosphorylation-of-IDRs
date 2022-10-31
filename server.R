@@ -14,15 +14,42 @@ library(ggvis)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
-    load("plotting_data_test.RData")
-    output$distPlot <- renderPlot({
+    load("plotting_data.RData")
+    
+    obsv_diso <- reactive({paste(input$predictor,"_psites_obsv_diso",sep = "")})
+    expct_diso <- reactive({paste(input$predictor,"_psites_expct_diso",sep = "")})
+    binom_sig <- reactive({paste(input$predictor,"_binom_sig",sep = "")})
+    
 
-      obsv_diso <- paste(input$predictor,"_psites_obsv_diso",sep = "")
-      expct_diso <- paste(input$predictor,"_psites_expct_diso",sep = "")
-      binom_sig <- paste(input$predictor,"_binom_sig",sep = "")
+    kinase_column <-reactive({input$kinase_column})
+    
+    kinase_target <- reactive({
+      
+      if (input$kinase_column=="target") {"Cdk1 target"}
+      else if (input$kinase_column=="target_mapk") {"mapk target"}
+      else if (input$kinase_column=="target_aurk") {"aurk target"}
+      else if (input$kinase_column=="target_plk") {"plk target"}
+      else if (input$kinase_column=="target_nek") {"nek target"}
+      else if (input$kinase_column=="target_dyrk") {"dyrk target"}
+      
+    })
+      
+     
+    output$kinasesTable <- renderDataTable({
+      if (input$kinase_column!="NULL") {subset(human_data,get(kinase_column()) == kinase_target())}
+      else {human_data}},
+      options = list(
+        pageLength = 10,
+        FixedHeader = TRUE,
+        search = F,
+        tabIndex= F
         
+      ))
+    
+    
+    output$distPlot <- renderPlot({
       all_phospho_plot<-ggplot(human_data) +
-        geom_point(aes(x=.data[[obsv_diso]],y=.data[[expct_diso]], colour = .data[[binom_sig]]),size=2,alpha=0.80)+
+        geom_point(aes(x=.data[[obsv_diso()]],y=.data[[expct_diso()]], colour = .data[[binom_sig()]]),size=2,alpha=0.80)+
         geom_abline(color="darkslategrey",slope = 1,size=0.5,linetype = "dashed")+
         ggpubr::theme_classic2() +
         theme(text = element_text(size=15),legend.position = c(0.25,0.75),legend.box.just = "left",legend.box.margin = margin(2, 2, 2, 2),legend.box.background = element_rect(color="darkslategrey"),legend.title = element_text(size = 13)) +
@@ -32,7 +59,10 @@ shinyServer(function(input, output) {
         scale_colour_manual(values = c(pal_jco()(10)[3],"#ffdd15ff",pal_jco()(10)[4]))
         
         # .data[[]] functions converts from the string to the variable name in the inherited data frame. In this case human_data.
-        if (input$kinase_column!="NULL") {all_phospho_plot + gghighlight(.data[[input$kinase_column]] == "Cdk1 target",keep_scales =T ,unhighlighted_params = list(color="grey",alpha=0.3),)} else {all_phospho_plot}
+        if (input$kinase_column!="NULL") {all_phospho_plot + gghighlight(.data[[kinase_column()]] == kinase_target(),keep_scales =T ,unhighlighted_params = list(color="grey",alpha=0.3))}
+        else {all_phospho_plot}
         },width = 400,height = 400)
         
 })
+
+

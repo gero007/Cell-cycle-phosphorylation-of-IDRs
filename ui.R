@@ -14,18 +14,31 @@ shinyUI(fluidPage(
 
     # Application title
     titlePanel("Cell cycle phosphorylation of IDRs"),
-
-    selectInput("predictor", "Disorder predictor: ",
-                c("SPOT disorder" = "SPOT",
-                  "IUPred" = "IUPred"
-                )),
     sidebarPanel( 
-    selectInput("kinase_column", "Kinase:",
+    
+      selectInput("predictor", "Disorder predictor: ",
+                  c("SPOT disorder" = "SPOT",
+                    "IUPred" = "IUPred"
+                  )),
+      
+      selectInput("kinase_column", "Kinase:",
                 c("All phosphorylations" = "NULL",
-                  "CDK1 subfamily" = "target"
-                  ))),
+                  "CDK1 subfamily" = "target",
+                  "MAPK family" = "target_mapk",
+                  "AURK family" = "target_aurk",
+                  "PLK family" = "target_plk",
+                  "NEK family" = "target_nek",
+                  "DYRK family" = "target_dyrk"
+                  )),
+      
+      width = 2),
+    
 
     # Show a plot of the generated distribution
-    mainPanel(plotOutput("distPlot"))
+    mainPanel(dataTableOutput("kinasesTable"),
+              plotOutput("distPlot")
+              )
+    
+    
     
 ))

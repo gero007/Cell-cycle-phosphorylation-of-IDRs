@@ -1,5 +1,9 @@
-./Rproj.user
-./Rhistory
-./RData
-./Ruserdata
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.plotting_data.RData
+.Rproj.user
 ./plotting_data_test.RData
+./.git/objects/pack/pack-954871a05571bd6d208da3ae42ff2f6484e78328.pack
+./plotting_data.RData
