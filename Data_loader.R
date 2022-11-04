@@ -237,4 +237,5 @@ human_data[,SPOT_binom_sig := factor(ifelse(SPOT_binom_q < 0.05, ifelse(SPOT_bin
 
 #____________________________________________________________________________________________________________________________________________#
 
-save.image("plotting_data.RData")
+rm(aurk_data,aux_table,disorder_predictions,dyrk_data,human_universe_data,IUPred_expVSobs,IUPred_predictions,mapk_data,nek_data,plk_data,SPOT_expVSobs,SPOT_predictions,file.names,ids)
+save.image("human_data.RData")

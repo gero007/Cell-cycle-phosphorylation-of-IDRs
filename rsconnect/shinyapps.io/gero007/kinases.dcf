@@ -1,0 +1,14 @@
+name: kinases
+title: kinases
+username:
+account: gero007
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7484035
+bundleId: 6463685
+url: https://gero007.shinyapps.io/kinases/
+when: 1667316466.39656
+lastSyncTime: 1667316466.39657
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: predictions

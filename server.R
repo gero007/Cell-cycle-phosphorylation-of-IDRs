@@ -14,12 +14,12 @@ library(ggvis)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
-    load("plotting_data.RData")
+    load("human_data.RData")
     
     obsv_diso <- reactive({paste(input$predictor,"_psites_obsv_diso",sep = "")})
     expct_diso <- reactive({paste(input$predictor,"_psites_expct_diso",sep = "")})
     binom_sig <- reactive({paste(input$predictor,"_binom_sig",sep = "")})
-    
+    padj <- reactive({paste(input$predictor,"_binom_q",sep = "")})
 
     kinase_column <-reactive({input$kinase_column})
     
@@ -36,8 +36,20 @@ shinyServer(function(input, output) {
       
      
     output$kinasesTable <- renderDataTable({
-      if (input$kinase_column!="NULL") {subset(human_data,get(kinase_column()) == kinase_target())}
-      else {human_data}},
+
+      
+      if (input$kinase_column!="NULL") {
+        aux_table <- subset(as.data.table(human_data),get(kinase_column()) == kinase_target())
+        aux_table <- aux_table[,c("ACC#","GENE","PROTEIN", "length",expct_diso(),obsv_diso(),padj())]
+        colnames(aux_table) <- c("UniProt ID","Gene","Protein","Length","Expected Psites in IDRs","Observed Psites in IDRs","Adjusted P-value")
+        aux_table
+      }
+      else {
+        aux_table <- human_data[,c("ACC#","GENE","PROTEIN", "length",expct_diso(),obsv_diso(),padj())]
+        colnames(aux_table) <- c("UniProt ID","Gene","Protein","Length","Expected Psites in IDRs","Observed Psites in IDRs","Adjusted P-value")
+        aux_table
+      }},
+      
       options = list(
         pageLength = 10,
         FixedHeader = TRUE,
